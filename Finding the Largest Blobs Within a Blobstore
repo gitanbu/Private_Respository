@@ -1,0 +1,30 @@
+The groovy script below will find the largest blobs inside a blobstore directory.
+Execute the script from the command line making sure dir_name points to the correct path for your sonatype-work directory. 
+The output contains a list of blobs larger than 100M sorted by size.
+
+long min_size = 100000000
+String dir_name = '/opt/Nexus/sonatype-work/nexus3'
+
+def ant = new AntBuilder()
+def scanner = ant.fileScanner {
+  fileset(dir: dir_name) {
+    include(name: '**/blobs/**/*.properties')
+    exclude(name: '**/metadata.properties')
+    exclude(name: '**/*metrics.properties')
+    exclude(name: '**/tmp')
+  }
+}
+def results = [:].withDefault { 0 }
+scanner.each { File file ->
+  def properties = new Properties()
+  file.withInputStream { is ->
+    properties.load(is)
+  }
+  long prop_size = properties.size as long;
+  if (prop_size > min_size) {
+    results.put(properties['@BlobStore.blob-name'], prop_size)
+  }
+}
+def sorted = results.sort { a, b -> b.value <=> a.value }
+
+sorted.each{ k, v -> println "${k}:${v}" }
