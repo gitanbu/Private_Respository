@@ -1,0 +1,30 @@
+The groovy script below can be executed as a task in Nexus Repository Manager. 
+In the Administration pane select System > Tasks. Create a new Execute Script task. 
+Set the Language to groovy and task frequency to Manual, using the Source below.
+When you execute the task the output logged to the nexus,log will list assets larger than min_size in descending size order for each repository.
+
+import org.sonatype.nexus.repository.storage.StorageFacet
+import org.sonatype.nexus.repository.Repository
+import org.sonatype.nexus.repository.storage.Asset
+import groovy.json.JsonOutput
+
+long min_size = 100000000
+
+repository.repositoryManager.browse().each { Repository repo ->
+    StorageFacet storageFacet = repo.facet(StorageFacet)
+    def tx = storageFacet.txSupplier().get()
+    def results = [:].withDefault { 0 }
+	try {
+    	tx.begin()    
+    
+    	tx.browseAssets(tx.findBucket(repo)).each { Asset asset ->
+      	if (asset.size() > min_size) {
+        	results.put(asset.name(),asset.size())
+      	}
+   	 }
+	} finally {
+    	tx.close()
+    }
+    def sorted = results.sort { a, b -> b.value <=> a.value }
+    log.info(JsonOutput.prettyPrint(JsonOutput.toJson(sorted)))
+}
