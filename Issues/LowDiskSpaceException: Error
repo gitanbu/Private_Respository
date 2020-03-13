@@ -1,0 +1,30 @@
+ Log from Nexus
+ --------------
+ 
+com.orientechnologies.orient.core.exception.OLowDiskSpaceException: Error occurred while executing a write operation to database 'accesslog' 
+due to limited free space on the disk (2605 MB). 
+The database is now working in read-only mode. Please close the database (or stop OrientDB), 
+make room on your hard drive and then reopen the database. The minimal required space is 4096 MB. 
+Required space is now set to 4096MB (you can change it by setting parameter storage.diskCache.diskFreeSpaceLimit) 
+
+vi /opt/nexus/nexus-3.16.2-01/etc/karaf/system.properties
+
+
+storage.diskCache.diskFreeSpaceLimit=4096
+
+Solution:
+--------
+
+#systemctl stop nexus
+
+Change 4096 to 2048
+
+#systemctl start nexus
+
+Delete unncesscary files from hosted repository 
+
+then change to 2048 to 4096 for storage.diskCache.diskFreeSpaceLimit
+
+# systemctl restart nexus
+
+
