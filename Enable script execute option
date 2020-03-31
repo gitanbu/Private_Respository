@@ -1,0 +1,8 @@
+
+   By Default Nexus version from 3.22 doest have Admin -> Execute Script Option  from Task,
+   
+   To enable this option , we need to edit nexus.properties file  and below line on nexus.properties file.
+
+   nexus.scripts.allowCreation=true
+    
+   /var/nexus/etc/nexus.properties
